@@ -25,7 +25,7 @@ Download the [UrbanFloodBench dataset](https://drive.google.com/file/d/18XT8NlOf
 
 After downloading:
 1. Extract the archive
-2. Place the extracted folders inside `/Models`
+2. Place the extracted folders inside `./`
 
 ## Repository Structure
 Your directory should look like this:
