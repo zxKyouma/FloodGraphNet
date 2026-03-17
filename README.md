@@ -3,6 +3,8 @@ Solution for the Kaggle competition
 
 [**UrbanFloodBench: Flood Modelling**](https://www.kaggle.com/competitions/urban-flood-modelling/overview)
 
+---
+
 A graph-aware XGBoost pipeline for urban flood prediction using hydraulic context features, flow proxies, and mass-balance approximations.
 
 Developed by team **NSEOverflow**
