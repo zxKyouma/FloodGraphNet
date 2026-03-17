@@ -89,6 +89,8 @@ Flood behavior in this task is **not purely local**: each node depends on *upstr
 
 By combining **graph-derived features**, **physics-inspired hydraulic proxy features**, **auxiliary flow surrogates (`qnet`, `qin`, `qout`)**, and a **two-stage regime-aware predictor**, the model captures propagation, retention, and delayed drainage more reliably than local rainfall and water-level features alone.
 
+---
+
 ### Model Overview
 
 At a high level, the model works in **four stages**.
@@ -108,6 +110,8 @@ A **two-stage XGBoost predictor** combines **regime classification** with **cond
 **Stage 4 — Final submission assembly**
 
 The full pipeline is trained separately for **`Model_1`** and **`Model_2`**, and their predictions are merged into the final submission.
+
+---
 
 ### Rationale & Experimental Flow
 
