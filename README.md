@@ -142,7 +142,7 @@ All hyperparameters were tuned using **Optuna**.
 
 ### Feature Engineering
 
-The final model used a total of 231 features.
+The final model used a total of 262 features.
 
 The strongest feature families in the final submission were:
 
