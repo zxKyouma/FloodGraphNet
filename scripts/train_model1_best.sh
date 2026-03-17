@@ -1,0 +1,271 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+# Historical best-branch Model_1 training flags, adapted to the public repo
+# paths and checkpoint name.
+python scripts/run_floodgraphflow_xgb.py \
+  --config configs/model1_best.yaml \
+  --backend xgboost_gpu \
+  --type_filter all \
+  --max_events_train -1 \
+  --max_events_val -1 \
+  --max_samples_train -1 \
+  --max_samples_val -1 \
+  --save_model_path saved_models/model1_best.pkl \
+  --event_quantile 0.88 \
+  --event_horizon 24 \
+  --phase_moe_edge 108 \
+  --hard_residual_trel_min 108 \
+  --hard_residual_event_score_quantile -1 \
+  --hard_residual_scale 1.0 \
+  --phys_residual_trel_min 80 \
+  --phys_residual_scale 0.65 \
+  --phys_residual_gap_min 0.0 \
+  --drain_expert_weight 0.7 \
+  --surcharge_expert_weight 1.0 \
+  --surcharge_trel_min 0 \
+  --surcharge_prob_threshold 0.5 \
+  --deep_storage_expert_weight 0.8 \
+  --deep_storage_trel_min 0 \
+  --deep_storage_depth_quantile 0.8 \
+  --deep_storage_min_rows 256 \
+  --tail_residual_expert_weight 0.8 \
+  --tail_residual_trel_min 108 \
+  --tail_residual_depth_quantile 0.8 \
+  --tail_residual_min_rows 256 \
+  --drain_trel_min 0 \
+  --drain_event_score_quantile 0.8 \
+  --drain_rain_q 0.4 \
+  --drain_d_down_q 0.2 \
+  --drain_d_head_q 0.2 \
+  --drain_k_of_3 2 \
+  --drain_release_min 0.0 \
+  --drain_lock_pressure_min -1.0 \
+  --dry_gap_rain_threshold 0.5 \
+  --dry_gap_future32_threshold 2.0 \
+  --tc_shift_windows 4,8,16,32 \
+  --event_tail_w_q90 2.0 \
+  --event_tail_w_q95 3.5 \
+  --event_tail_w_q99 6.0 \
+  --xgb_reg_n_estimators 800 \
+  --xgb_reg_learning_rate 0.03 \
+  --xgb_reg_max_depth 8 \
+  --xgb_cls_n_estimators 600 \
+  --xgb_cls_learning_rate 0.03 \
+  --xgb_cls_max_depth 6 \
+  --xgb_es_rounds 50 \
+  --xgb_es_val_frac 0.1 \
+  --xgb_es_min_rows 20000 \
+  --routing_lags 1,2,4,8,12,24,36,48 \
+  --future_rain_windows 1,2,4,8,16,32,64 \
+  --future_rain_bin_edges 0,4,8,16,32,64 \
+  --storm_context_windows 24,48,96 \
+  --upstream_rain_windows 4,8,16,32 \
+  --stage_a_peak_weight_alpha 2.0 \
+  --stage_b_peak_weight_alpha 6.0 \
+  --kaggle_proxy_type_balance_power 1.0 \
+  --kaggle_proxy_late_start 108 \
+  --kaggle_proxy_late_tau 24.0 \
+  --kaggle_proxy_late_weight 1.5 \
+  --kaggle_proxy_event_q 0.8 \
+  --kaggle_proxy_event_tau 0.5 \
+  --kaggle_proxy_event_weight 1.5 \
+  --depth_var_mode depth \
+  --depth_var_power 0.5 \
+  --depth_var_clip_min 0.5 \
+  --depth_var_clip_max 2.0 \
+  --tail_row_weight 2.0 \
+  --tail_row_trel_min 108 \
+  --tail_row_depth_quantile 0.8 \
+  --tail_row_event_score_quantile 0.8 \
+  --tail_row_clip_min 0.75 \
+  --tail_row_clip_max 3.0 \
+  --graph_upstream_hops 1 \
+  --graph_upstream_decay 1.0 \
+  --qhat_graph_hops 1 \
+  --qhat_graph_decay 1.0 \
+  --edge_aware_downstream_topk 2 \
+  --delay_aligned_forcing_topk 2 \
+  --mc_route_k 3.0 \
+  --mc_route_x 0.2 \
+  --mc_route_late_start 108 \
+  --routing_oof_horizons 1,4,8,16,32,64,128,256,448 \
+  --routing_oof_peak_horizons 24,48 \
+  --routing_oof_time_to_peak_h 48 \
+  --routing_oof_ridge_alpha 3.0 \
+  --routing_oof_backend ridge \
+  --routing_oof_lgbm_n_estimators 400 \
+  --routing_oof_lgbm_learning_rate 0.05 \
+  --routing_oof_lgbm_num_leaves 31 \
+  --routing_oof_lgbm_max_depth 5 \
+  --routing_oof_lgbm_min_child_samples 200 \
+  --routing_oof_lgbm_subsample 0.8 \
+  --routing_oof_lgbm_colsample_bytree 0.8 \
+  --aux_peak_horizons 24 \
+  --aux_future_drop_horizons '' \
+  --aux_future_release_horizons '' \
+  --aux_future_release_ema_horizon 64 \
+  --aux_future_release_ema_alpha 0.90 \
+  --aux_late_peak_start 109 \
+  --aux_late_peak_end 448 \
+  --aux_recession_window 24 \
+  --aux_surcharge_q 0.995 \
+  --recession_future_window 48 \
+  --recession_dry_eps 1e-6 \
+  --recession_k 0.08 \
+  --recession_min_elev 0.3 \
+  --val_postprocess_method none \
+  --val_postprocess_gate none \
+  --val_postprocess_alpha 1.0 \
+  --val_postprocess_trel_min 109 \
+  --two_stage \
+  --drop_feature_indices 47,48,51,128,129,133,140,149,153,162 \
+  --phase_moe_pilot \
+  --no_hard_residual_correction \
+  --hard_residual_type1_only \
+  --no_hard_residual_use_drain_gate \
+  --no_phys_residual_correction \
+  --phys_residual_type1_only \
+  --phys_residual_use_drain_gate \
+  --no_drain_expert_enabled \
+  --no_surcharge_expert_enabled \
+  --surcharge_expert_hard_routing \
+  --surcharge_type1_only \
+  --no_deep_storage_expert_enabled \
+  --no_deep_storage_expert_hard_routing \
+  --deep_storage_type1_only \
+  --no_tail_residual_expert_enabled \
+  --tail_residual_type1_only \
+  --tail_residual_use_drain_gate \
+  --drain_type1_only \
+  --no_stagea_interior_t1_correction \
+  --qnet_stack \
+  --qnet_state_features \
+  --qnet_phys_baseline_feature \
+  --no_qnet_seq_refiner \
+  --qinout_stack \
+  --qinout_state_features \
+  --no_qinout_drain_dynamics_features \
+  --no_qinout_transform_features \
+  --no_xgb_es_enable \
+  --fe_routing_features \
+  --no_fe_tslr_features \
+  --fe_upstream_hist_ema_features \
+  --no_fe_qinout_hist_ema_features \
+  --no_fe_qinout_split_hist_ema_features \
+  --no_fe_qinout_hist_prune_brittle \
+  --no_fe_headlock_hist_ema_features \
+  --no_fe_dry_gap_forward_features \
+  --no_fe_tc_shifted_rain_features \
+  --no_tc_shift_boundary_only \
+  --fe_t_rel \
+  --fe_time_features \
+  --fe_future_rain_features \
+  --no_fe_future_rain_bin_features \
+  --no_fe_travel_time_proxy_features \
+  --no_fe_storm_context_features \
+  --no_fe_storm_boundary_interactions \
+  --fe_endpoint_boundary_features \
+  --no_fe_boundary_subtype_features \
+  --no_fe_boundary_priors_features \
+  --no_fe_hyetograph_path_synchronized_v1 \
+  --no_fe_full_path_congestion_features \
+  --no_fe_dynamic_hydraulic_regime_features \
+  --fe_hydro_topo_features \
+  --fe_fill_rain_features \
+  --no_fe_rain_to_void_surcharge_features \
+  --no_fe_storage_normalized_tail_features \
+  --no_fe_latent_hydraulic_state_features \
+  --no_fe_event_relative_norm_features \
+  --no_fe_state_disagreement_features \
+  --no_fe_transform_cleanup_v1 \
+  --no_fe_zero_area_endpoint_features \
+  --no_fe_regional_tail_features \
+  --fe_targeted_physics_features \
+  --fe_dv_dh_features \
+  --fe_global_position_features \
+  --fe_basin_macro_features \
+  --no_fe_topo_eigen_features \
+  --no_fe_storm_motion_features \
+  --no_fe_wl_accel_features \
+  --no_fe_lag_aligned_upstream_rain \
+  --fe_basin_mass_deficit_features \
+  --fe_subcatchment_mass_deficit_features \
+  --subcatchment_k 12 \
+  --no_fe_spillover_features \
+  --fe_twi_spi_features \
+  --fe_network_routing_potential_features \
+  --no_fe_cumulative_upstream_capacity_features \
+  --no_fe_dijkstra_topology_features \
+  --fe_hand_proxy_features \
+  --no_fe_antecedent_wetness_features \
+  --fe_multiscale_mass_mismatch_features \
+  --fe_downstream_lockup_features \
+  --no_fe_wl_argmax_features \
+  --no_fe_hysteresis_features \
+  --no_fe_recession_state_features \
+  --no_fe_drain_timescale_features \
+  --fe_drain_regime_priors_features \
+  --no_fe_drain_progress_features \
+  --no_fe_drain_finalboss_features \
+  --no_fe_1d2d_interface_features \
+  --no_fe_pseudo_ar_refresh_features \
+  --no_fe_surcharge_prone_features \
+  --fe_node_priors \
+  --no_fe_node_drop_priors \
+  --no_fe_node_cluster_id \
+  --fe_leadtime_features \
+  --fe_graph_pulse \
+  --fe_upstream_rain_features \
+  --fe_relative_elev \
+  --fe_graph_hop2_features \
+  --fe_level_imbalance_features \
+  --fe_capacity_state_features \
+  --no_fe_tau_flow_features \
+  --no_fe_pipe_mass_balance_features \
+  --no_fe_pipe_momentum_features \
+  --no_fe_pipe_physics_proxy_features \
+  --fe_pipe_bottleneck_features \
+  --no_fe_pipe_regime_conflict_features \
+  --no_fe_downstream_backwater_features \
+  --no_fe_downstream_dynamics_features \
+  --no_fe_edge_aware_downstream_features \
+  --no_fe_edge_aware_downstream_hist_ema_features \
+  --no_fe_downstream_unlock_duration_features \
+  --no_fe_edge_topo_driver_features \
+  --no_fe_delay_aligned_forcing_features \
+  --no_fe_flux_continuity_residual_features \
+  --no_fe_mc_route_features \
+  --no_mc_route_v11 \
+  --no_mc_route_phys_v2 \
+  --fe_qhat_graph2 \
+  --fe_qhat_graph2_hop2 \
+  --no_fe_routing_oof_meta \
+  --no_aux_surcharge_proxy \
+  --no_aux_late_peak_prob \
+  --no_aux_recession_rate \
+  --no_aux_future_unlock_prob \
+  --no_aux_future_release_ema_v1 \
+  --no_aux_endpoint_continuation \
+  --no_aux_mass_imbalance_proxy \
+  --qnet_oof_folds 5 \
+  --oof_event_strat_bins 8 \
+  --no_oof_event_stratified \
+  --exact_series_eval \
+  --no_postprocess_clamp_invert \
+  --no_recession_correction \
+  --recession_type1_only \
+  --no_residual_target \
+  --no_fill_ratio_target \
+  --no_ar_delta_mode \
+  --ar_prev_feature \
+  --ar_recursive_infer \
+  --no_kaggle_proxy_weights \
+  --no_depth_var_weights \
+  --depth_var_type1_only \
+  --no_tail_row_weights \
+  --tail_row_type1_only \
+  "$@"

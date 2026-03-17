@@ -21,3 +21,5 @@ saved_models/
 *.npy
 *.npz
 *.csv
+Models/
+test_Models/

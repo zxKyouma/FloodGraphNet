@@ -10,13 +10,37 @@ from argparse import ArgumentParser, Namespace
 from contextlib import redirect_stdout
 from datetime import datetime
 from data import dataset_factory, FloodEventDataset
-from models import model_factory
-from test import get_test_dataset_config, run_test
-from training import trainer_factory
 from typing import Dict, Optional, Tuple
-from utils import Logger, file_utils, postprocess_utils, train_utils
-from constants import EDGE_MODELS, NODE_EDGE_MODELS
-from testing import DualAutoregressiveTester, EdgeAutoregressiveTester, NodeAutoregressiveTester
+from utils import Logger, file_utils
+
+try:
+    from models import model_factory
+except ImportError:
+    model_factory = None
+
+try:
+    from test import get_test_dataset_config, run_test
+except ImportError:
+    get_test_dataset_config = None
+    run_test = None
+
+try:
+    from training import trainer_factory
+except ImportError:
+    trainer_factory = None
+
+try:
+    from constants import EDGE_MODELS, NODE_EDGE_MODELS
+except ImportError:
+    EDGE_MODELS = ()
+    NODE_EDGE_MODELS = ()
+
+try:
+    from testing import DualAutoregressiveTester, EdgeAutoregressiveTester, NodeAutoregressiveTester
+except ImportError:
+    DualAutoregressiveTester = None
+    EdgeAutoregressiveTester = None
+    NodeAutoregressiveTester = None
 
 def parse_args() -> Namespace:
     parser = ArgumentParser(description='')
@@ -27,6 +51,64 @@ def parse_args() -> Namespace:
     parser.add_argument("--device", type=str, default=('cuda' if torch.cuda.is_available() else 'cpu'), help='Device to run on')
     parser.add_argument("--debug", type=bool, default=False, help='Add debug messages to output')
     return parser.parse_args()
+
+def _split_dataset_events(root_dir: str,
+                          dataset_summary_file: str,
+                          percent_validation: float,
+                          seed: int | None = None) -> Tuple[str, str]:
+    if not (0 < percent_validation < 1):
+        raise ValueError(f'Invalid percent_split: {percent_validation}. Must be between 0 and 1.')
+
+    raw_dir_path = os.path.join(root_dir, 'raw')
+    dataset_summary_path = file_utils.resolve_existing_path(
+        dataset_summary_file,
+        root_dir=root_dir,
+        include_raw_fallback=True,
+        label='Dataset summary file',
+    )
+
+    summary_df = pd.read_csv(dataset_summary_path)
+    assert len(summary_df) > 0, f'No data found in summary file: {dataset_summary_path}'
+
+    num_val_events = max(int(len(summary_df) * percent_validation), 1)
+    split_idx = len(summary_df) - num_val_events
+
+    dataset_summary_dir = os.path.dirname(dataset_summary_path)
+    dataset_summary_basename = os.path.splitext(os.path.basename(dataset_summary_file))[0]
+    split_suffix = 'split' if seed is None else f'split_seed{seed}'
+    split_folder = os.path.join(dataset_summary_dir, f'{dataset_summary_basename}_{split_suffix}')
+
+    train_df_file = os.path.join(split_folder, 'train_split.csv')
+    val_df_file = os.path.join(split_folder, 'val_split.csv')
+
+    rel_base = raw_dir_path
+    try:
+        summary_abs = os.path.abspath(dataset_summary_path)
+        raw_abs = os.path.abspath(raw_dir_path)
+        if os.path.commonpath([summary_abs, raw_abs]) != raw_abs:
+            rel_base = root_dir
+    except ValueError:
+        rel_base = root_dir
+
+    if os.path.exists(train_df_file) and os.path.exists(val_df_file):
+        return os.path.relpath(train_df_file, rel_base), os.path.relpath(val_df_file, rel_base)
+
+    if not os.path.exists(split_folder):
+        os.makedirs(split_folder)
+
+    if seed is not None:
+        summary_df = summary_df.sample(frac=1, random_state=seed).reset_index(drop=True)
+
+    train_rows = summary_df[:split_idx]
+    train_rows.to_csv(train_df_file, index=False)
+
+    val_rows = summary_df[split_idx:]
+    val_rows.to_csv(val_df_file, index=False)
+
+    train_df_relative = os.path.relpath(train_df_file, rel_base)
+    val_df_relative = os.path.relpath(val_df_file, rel_base)
+
+    return train_df_relative, val_df_relative
 
 def load_dataset(config: Dict, args: Namespace, logger: Logger) -> Tuple[FloodEventDataset, Optional[FloodEventDataset]]:
     dataset_parameters = config['dataset_parameters']
@@ -129,7 +211,7 @@ def load_dataset(config: Dict, args: Namespace, logger: Logger) -> Tuple[FloodEv
     # Split dataset into training and validation sets for autoregressive training
     logger.log(f'Splitting dataset into training and validation sets with {percent_validation * 100}% for validation')
     split_seed = train_config.get('split_seed')
-    train_summary_file, val_summary_file = train_utils.split_dataset_events(
+    train_summary_file, val_summary_file = _split_dataset_events(
         root_dir,
         dataset_summary_file,
         percent_validation,
@@ -184,6 +266,8 @@ def run_train(model: torch.nn.Module,
               model_dir: Optional[str] = None,
               device: str = 'cpu',
               resume_checkpoint_path: Optional[str] = None) -> str:
+        from utils import train_utils
+
         train_config = config['training_parameters']
 
         # Loss function and optimizer
@@ -251,6 +335,8 @@ def run_postprocess_eval(model: torch.nn.Module,
                          logger: Logger,
                          config: Dict,
                          device: str) -> None:
+    from utils import postprocess_utils
+
     testing_cfg = config.get('testing_parameters', {})
     if not testing_cfg.get('postprocess_eval_on_train_end', False):
         return
@@ -360,6 +446,25 @@ def run_postprocess_eval(model: torch.nn.Module,
 def main():
     args = parse_args()
     config = file_utils.read_yaml_file(args.config)
+
+    missing = []
+    if model_factory is None:
+        missing.append("models")
+    if trainer_factory is None:
+        missing.append("training")
+    if get_test_dataset_config is None or run_test is None:
+        missing.append("test")
+    if (
+        DualAutoregressiveTester is None
+        or EdgeAutoregressiveTester is None
+        or NodeAutoregressiveTester is None
+    ):
+        missing.append("testing")
+    if missing:
+        raise ModuleNotFoundError(
+            "Missing neural-training modules required by train.py main(): "
+            + ", ".join(sorted(set(missing)))
+        )
 
     train_config = config['training_parameters']
     log_path = train_config['log_path']

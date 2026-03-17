@@ -1,7 +1,11 @@
 import torch
 import numpy as np
 
-from data.hecras_data_retrieval import get_wl_vol_interp_points_for_cell, get_cell_area
+try:
+    from data.hecras_data_retrieval import get_wl_vol_interp_points_for_cell, get_cell_area
+except ModuleNotFoundError:
+    get_wl_vol_interp_points_for_cell = None
+    get_cell_area = None
 from torch import Tensor
 from torch.nn.functional import mse_loss, l1_loss
 
@@ -278,6 +282,11 @@ def CSI(binary_pred: Tensor, binary_target: Tensor):
     return TP / (TP + FN + FP)
 
 def interpolate_wl_from_vol(water_volume: np.ndarray, hec_ras_file_path: str, num_nodes: int = None):
+    if get_wl_vol_interp_points_for_cell is None or get_cell_area is None:
+        raise ModuleNotFoundError(
+            "HEC-RAS interpolation helpers are unavailable in this repo snapshot."
+        )
+
     if num_nodes is None:
         num_nodes = water_volume.shape[1]
 
