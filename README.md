@@ -77,6 +77,10 @@ A **two-stage XGBoost predictor** combines **regime classification** with **cond
 
 The full pipeline is trained separately for **`Model_1`** and **`Model_2`**, and their predictions are merged into the final submission.
 
+### Rationale & Experimental Flow
 
+### Model Ablations
+
+### Feature Engineering
 
 
