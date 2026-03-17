@@ -122,67 +122,40 @@ At a high level, the model works in **four stages**.
 
 ### Feature Engineering
 
-The final submission used a total of 250+ derived features (32 stacked stage A, 213 stage B). A detailed list of all included features is included in `FEATURES.md`.
+The final submission used a total of 250+ derived features (32 stacked stage A, 213 stage B). 
 
-The strongest feature families in the final branch were:
+The strongest feature families in the final submission were:
 
 #### 1. Graph-propagated water-level context
 
 > These features summarize nearby hydraulic state over the drainage graph rather than using only the local node.
 
-**`fe_graph_pulse`**
-  - Aggregates warm-start water level over upstream neighbors
-  - Produces upstream level sum and mean
-
-**`fe_graph_hop2_features`**
-  - Extends this idea to 2-hop upstream context
-  - Produces 2-hop upstream sum and mean
-
-**`fe_level_imbalance_features`**
-  - Measures local hydraulic imbalance using upstream and downstream support
-  - Includes:
-    - `level_imbalance = upstream_sum - downstream_sum`
-    - `level_gradient = local_wl - upstream_mean`
-    - `downstream_pull = downstream_mean - local_wl`
+- **`fe_graph_pulse`**
+- **`fe_graph_hop2_features`**
+- **`fe_level_imbalance_features`**
 
 #### 2. Stage-A net-flow stack (`qnet`)
 
 > We train an auxiliary model to predict net flow, then feed those predictions back into the main model.
 
-**`qnet_stack`**
-  - Predicts latent net flow (`qhat`)
-  - Can expose raw `qhat`, rolling summaries, cumulative values, and lags
-
-**`qnet_phys_baseline_feature`**
-  - Adds a physics-style baseline:
-  - `predicted_water_level_baseline = y_base + qhat`
-
-**`fe_qhat_graph2`**
-  - Pushes predicted `qhat` through the graph
-  - Builds upstream sum, upstream mean, and upstream-downstream imbalance features
-
-**`fe_qhat_graph2_hop2`**
-  - Extends graph summaries of `qhat` to 2-hop upstream structure
+- **`qnet_stack`**
+- **`qnet_phys_baseline_feature`**
+- **`fe_qhat_graph2`**
+- **`fe_qhat_graph2_hop2`**
 
 #### 3. Stage-A inflow / outflow stack (`qin`, `qout`)
 
 > These features expose directional transport structure that is hard to recover from local predictors alone.
 
 - **`qinout_stack`**
-  - Trains separate auxiliary models for inflow and outflow
-  - Appends predicted `qin` and `qout`
-  - Includes cumulative, rolling, and lagged summaries
 
 #### 4. Basin mass-deficit and storage proxy features
 
 > These are the main mass-balance-like engineered features.
 
 - **`fe_basin_mass_deficit_features`**
-  - Computes current basin storage from denormalized node `water_volume`
-  - Computes accumulated rainfall volume since warm start using node area
-  - Defines:
-    - `expected = warm_start_basin_storage + accumulated_rain_volume`
-    - `basin_mass_deficit = expected - current_basin_storage`
+
+A detailed list of all included features is included in `FEATURES.md`.
 
 ---
 
