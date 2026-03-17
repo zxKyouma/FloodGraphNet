@@ -139,7 +139,7 @@ All hyperparameters were tuned using **Optuna**.
 
 ### Feature Engineering
 
-The final submission used a total of 250+ derived features (32 stacked stage A, 213 stage B). 
+The final submission used a total of 231 featurs.
 
 The strongest feature families in the final submission were:
 
