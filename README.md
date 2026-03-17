@@ -114,6 +114,14 @@ At a high level, the model works in **four stages**.
 
 ---
 ### Preprocessing
+- **Normalization:** z-score normalization applied to all static and dynamic node/edge features.
+
+- **Stabilization of heavy-tailed features:**
+  - Clipping of extreme values
+  - `log1p` / `asinh` transforms for hydraulic ratios and interaction terms
+
+- **Edge-case handling:**
+  - Dedicated treatment of zero-area endpoint nodes to maintain stable feature distributions
 
 ---
 
