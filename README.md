@@ -21,7 +21,7 @@ conda activate flood
 ```
 
 ## Dataset
-Download the [UrbanFloodBench dataset](https://drive.google.com/file/d/18XT8NlOfWOnR64mi6faKOR2mVzqpaLSA/view)
+Download the [UrbanFloodBench dataset](https://drive.google.com/file/d/18XT8NlOfWOnR64mi6faKOR2mVzqpaLSA/view) and the model checkpoints
 
 After downloading:
 1. Extract the archive
@@ -30,12 +30,16 @@ After downloading:
    ```bash
    bash scripts/populate_model_metadata.sh
    ```
+4. Place the model checkpoints in `/saved_models`
 
 ## Repository Structure
 Your directory should look like this:
 ```
 FloodGraphFlow-XGB
 ...
+├── saved_models
+│   ├── model1_best.pkl
+│   └── model2_best.pkl
 ├── Models
 │   ├── Model_1
 │   │   ├── train
