@@ -56,9 +56,7 @@ from train import load_dataset  # noqa: E402
 from data import dataset_factory  # noqa: E402
 from utils import Logger, file_utils, metric_utils  # noqa: E402
 
-# Note: this script is designed for fast iteration on XGBoost-based baselines and ablations, but the core pipeline supports multiple backend regressors and is easily extensible to other model types.
 def parse_args() -> argparse.Namespace:
-    # TODO: consider splitting into separate scripts for pure regression baseline, two-stage event-regime model, and MoE/expert-slice pilots to reduce argument complexity and surface only relevant options per script.
     p = argparse.ArgumentParser(
         description="Submission-equivalent rain baseline on full val (no post-t10 dynamic leakage)."
     )
