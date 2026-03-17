@@ -25,8 +25,10 @@ Download the [UrbanFloodBench dataset](https://drive.google.com/file/d/18XT8NlOf
 
 After downloading:
 1. Extract the archive
-2. Place the extracted folders inside `./`
-3. Run `/scripts/populate_model_metadata.sh` to move dataset in `/metadata` into `Models` with the correct structure expected by future scripts
+2. Place the extracted folders in the project root (`./`) 
+3. Run the metadata setup script:
+   ```bash
+   scripts/populate_model_metadata.sh
 
 ## Repository Structure
 Your directory should look like this:
