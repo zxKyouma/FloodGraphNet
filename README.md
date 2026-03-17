@@ -21,7 +21,7 @@ conda activate flood
 ```
 
 ## Dataset
-Download the [UrbanFloodBench dataset](https://drive.google.com/file/d/18XT8NlOfWOnR64mi6faKOR2mVzqpaLSA/view) and the model checkpoints
+Download the [UrbanFloodBench dataset](https://drive.google.com/file/d/18XT8NlOfWOnR64mi6faKOR2mVzqpaLSA/view) and the [model checkpoints](https://drive.google.com/drive/u/1/folders/1BIUuIi7HLhT46s47kIhYu0hA4vBXFsmG)
 
 After downloading:
 1. Extract the archive
