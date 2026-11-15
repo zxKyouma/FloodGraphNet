@@ -4,7 +4,7 @@ Solution for the Kaggle competition
 
 [**UrbanFloodBench: Flood Modelling**](https://www.kaggle.com/competitions/urban-flood-modelling/overview)
 
-<img width="400" height="233" alt="Gemini_Generated_Image_vr2b04vr2b04vr2b" src="https://github.com/user-attachments/assets/c47540cb-5d99-4e67-86e4-10e874e2c8fc" />
+<img width="400" height="233" alt="FloodGraphNet" src="https://github.com/user-attachments/assets/c47540cb-5d99-4e67-86e4-10e874e2c8fc" />
 
 ---
 A graph-aware XGBoost pipeline for urban flood prediction using hydraulic context features, flow proxies, and mass-balance approximations.
